@@ -1,6 +1,8 @@
 import heapq
 import sys
 
+input_file = ""
+
 if len(sys.argv) > 1:
     input_file = sys.argv[1]
 else:
@@ -14,7 +16,8 @@ with open(input_file, "r") as f:
         row = list(map(int, f.readline().strip().split()))
         matrix.append(row)
 
-    def prim_mst_min(adj_matrix):
+
+    def _prim_mst(adj_matrix, sign):
         num_vertices = len(adj_matrix)
         visited = [False] * num_vertices
         mst_edges = []
@@ -27,29 +30,18 @@ with open(input_file, "r") as f:
                 parents[vertex] = parent
                 for neighbor, neighbor_weight in enumerate(adj_matrix[vertex]):
                     if neighbor_weight > 0 and not visited[neighbor]:
-                        heapq.heappush(min_heap, (neighbor_weight, neighbor, vertex))
+                        heapq.heappush(min_heap, (neighbor_weight * sign, neighbor, vertex))
                 if vertex != 0:
-                    mst_edges.append((min(vertex, parent), max(vertex, parent), weight))
+                    mst_edges.append((min(vertex, parent), max(vertex, parent), weight * sign))
         return mst_edges
+
+
+    def prim_mst_min(adj_matrix):
+        return _prim_mst(adj_matrix, 1)
 
 
     def prim_mst_max(adj_matrix):
-        num_vertices = len(adj_matrix)
-        visited = [False] * num_vertices
-        mst_edges = []
-        parents = [-1] * num_vertices
-        min_heap = [(-0, 0, -1)]  # змінюємо знак ваги ребра на протилежний
-        while min_heap:
-            weight, vertex, parent = heapq.heappop(min_heap)
-            if not visited[vertex]:
-                visited[vertex] = True
-                parents[vertex] = parent
-                for neighbor, neighbor_weight in enumerate(adj_matrix[vertex]):
-                    if neighbor_weight > 0 and not visited[neighbor]:
-                        heapq.heappush(min_heap, (-neighbor_weight, neighbor, vertex))
-                if vertex != 0:
-                    mst_edges.append((min(vertex, parent), max(vertex, parent), -weight))
-        return mst_edges
+        return _prim_mst(adj_matrix, -1)
 
 
     min_tree = prim_mst_min(matrix)
